@@ -13,6 +13,10 @@ export default function Signup() {
   const [message, setMessage] = useState("");
 
   const history = useNavigate();
+  const [userId, setUserId] = useState(sessionStorage.getItem("Id"));
+    if (userId) {
+      window.location.href = "/todo";
+    }
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });

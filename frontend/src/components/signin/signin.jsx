@@ -1,5 +1,5 @@
 import "./signin.css";
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -10,6 +10,10 @@ export default function Signin(){
 
     const [form, setForm] = useState({ email: "", password: "" });
     const [message, setMessage] = useState("");
+    const [userId, setUserId] = useState(sessionStorage.getItem("Id"));
+    if (userId) {
+      window.location.href = "/todo";
+    }
 
     const history = useNavigate();
     const dispatch = useDispatch();
