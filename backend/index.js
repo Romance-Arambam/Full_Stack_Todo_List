@@ -6,7 +6,9 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 
 const cors = require("cors");
-app.use(cors());
+app.use(cors({
+  origin: ["http://localhost:5173", "https://romance-todolist.com"],
+}));
 
 require("dotenv").config();
 require("./connection");

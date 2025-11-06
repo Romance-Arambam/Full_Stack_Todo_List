@@ -6,8 +6,6 @@ const UserModel = require("../Schemas/user");
 router.post("/addTask", async (req, res) => { 
   try {
     const { title, body, id } = req.body;
-
-    // ✅ Fix: use findById correctly
     const existingUser = await UserModel.findById(id);
     if (!existingUser) {
       return res.status(404).json({ message: "User not found", success: false });
@@ -29,7 +27,7 @@ router.post("/addTask", async (req, res) => {
 //get all tasks
 router.get("/getTasks/:id", async(req, res)=>{
     try{
-        const list = await ListModel.find({user: req.params.id}).sort({createdAt: -1});
+        const list = await ListModel.find({user: req.params.id}).sort({createdAt: 1});
         if(list.length !== 0)
             res.status(200).json({list: list});
         else
@@ -43,21 +41,34 @@ router.get("/getTasks/:id", async(req, res)=>{
 
 //update task
 router.put("/updateTask/:id", async (req, res) => {
-    try{
-        const { title, body, email}= req.body;
-        const existingUser = await UserModel.findOne({email});
-        if(existingUser){
-            const list = await ListModel.findByIdAndUpdate(req.params.id, {title, body});
-            list.save();
+  try {
+    const { title, body, userId } = req.body; // use id (user id)
+    console.log("Update request for task:", req.params.id, "by user:", userId);
+    if (!userId) return res.status(400).json({ message: "User id required", success: false });
 
-            res.status(200).json({list, message: "task updated successfully", success: true});
+    // find the task
+    const task = await ListModel.findById(req.params.id);
+    if (!task) return res.status(404).json({ message: "Task not found", success: false });
 
-        }
+    // check ownership: task.user should match userId
+    if (task.user.toString() !== userId.toString()) {
+      return res.status(403).json({ message: "Not authorized to update this task", success: false });
     }
-    catch(err){
-        res.status(500).json({message: err.message, success: false});
-    }
+
+    // update and return the new document
+    const updated = await ListModel.findByIdAndUpdate(
+      req.params.id,
+      { title, body, updatedAt: Date.now() },
+      { new: true, runValidators: true }
+    );
+
+    return res.status(200).json({ list: updated, message: "Task updated successfully", success: true });
+  } catch (err) {
+    console.error("Update task error:", err);
+    return res.status(500).json({ message: err.message, success: false });
+  }
 });
+
 
 //delete task
 router.delete("/deleteTask/:id", async(req,res)=>{
