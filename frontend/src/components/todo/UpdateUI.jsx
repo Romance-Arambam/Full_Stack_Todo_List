@@ -15,27 +15,36 @@ function UpdateUI({item, onUpdated, tasks, setTasks}) {
   };
 
   const handleUpdate = async () => {
-      try {
-          console.log("weufhoweuhfuio")
-        const res = await axios.put(`http://localhost:3000/updateTask/${item._id}`, {
-          title: inputs.title,
-          body: inputs.body,
-          userId: userId
-        });
-        console.log("updated response", res.data);
-        setTasks(tasks.filter(task => task._id !== item._id));
-        setTasks((prev) => [...prev, res.data.list]);
-        onUpdated();
+  try {
+    const res = await axios.put(`http://localhost:3000/updateTask/${item._id}`, {
+      title: inputs.title,
+      body: inputs.body,
+      userId: userId
+    });
 
-        toast.success("Task updated successfully!");
-        onUpdated();
-      } catch (err) {
-        toast.error(err.response?.data?.message || "Error updating task");
-      }
-  };
+    console.log("updated response", res.data);
+
+    // Get the updated task (depending on your API response)
+    const updatedTask = res.data.list; // adjust if your API returns differently
+
+    // Replace the updated task in the same position
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task._id === item._id ? updatedTask : task
+      )
+    );
+
+    toast.success("Task updated successfully!");
+    onUpdated();
+  } catch (err) {
+    console.error("Update error:", err);
+    toast.error(err.response?.data?.message || "Error updating task");
+  }
+};
+
   return (
     <div>
-        <ToastContainer />
+        {/* <ToastContainer /> */}
       <div className="p-5 d-flex flex-column justify-content-center align-items-start todo-update">
       <h2>Update Your Task</h2>
       <input
